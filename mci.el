@@ -69,7 +69,9 @@
   "Return a string repr of HOST."
   (concat
    (mci--propertize-status (format "%-9s" (alist-get 'status host)))
-   (propertize (format "%-50s" (alist-get 'host host)) 'face 'italic)
+   (if (eq (alist-get 'host host) "")
+       "-starting-"
+     (propertize (format "%-50s" (alist-get 'host host)) 'face 'italic))
    (format " %-5s " (alist-get 'host_type host))
    (format "%-20s "(alist-get 'id host))
    (format "%-20s "(alist-get 'distro host))

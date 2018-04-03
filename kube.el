@@ -17,12 +17,13 @@
 
 (defun kube--command-on-region (command)
   "Run COMMAND on region."
-  (shell-command-on-region nil nil command))
+  (shell-command-on-region (region-beginning) (region-end) command))
 
 (defun kube-delete ()
   "Run kubectl delete -f <this-buffer-filename>."
   (interactive)
   (let ((filename (buffer-file-name)))
+    (save-buffer)
     (message (shell-command-to-string (concat "kubectl delete -f " filename)))))
 
 (defun kube-delete-region ()
@@ -34,6 +35,7 @@
   "Apply this file, creating or updating a given Kubernetes Resource."
   (interactive)
   (let ((filename (buffer-file-name)))
+    (save-buffer)
     (message (shell-command-to-string (concat "kubectl apply -f " filename)))))
 
 (defun kube-apply-region ()

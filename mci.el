@@ -16,7 +16,7 @@
 
 (defun mci-get-hosts ()
   "Gets mci list of hosts from mci."
-  (reverse (mapcar 'json-read-from-string (butlast (split-string (shell-command-to-string "mci plain") "\n")))))
+  (reverse (mapcar 'json-read-from-string (butlast (split-string (shell-command-to-string "mci list --plain") "\n")))))
 
 
 (defun mci--propertize-status (status)
@@ -135,7 +135,7 @@
 (defun mci-spawn ()
   "Spawn a new host in mci."
   (interactive)
-  (let* ((distros (butlast (split-string (shell-command-to-string "mci distros --plain") "\n"))))
+  (let* ((distros (butlast (split-string (shell-command-to-string "mci distros | awk '{ print $3 }'") "\n"))))
     (helm :sources (helm-build-sync-source "MCI Distros"
                      :candidates distros
                      :fuzzy-match t

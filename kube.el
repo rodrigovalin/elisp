@@ -61,6 +61,28 @@
   (interactive)
   (shell-command-to-string "minikube dashboard"))
 
+(defun do-kubectl-switch (context)
+  "Run kubectl to switch context to CONTEXT."
+  (message (shell-command-to-string (concat "kubectl config use-context " context))))
+
+(defun kube-get-contexts ()
+  "Get a list of available contexts."
+  (cdr (mapcar (function (lambda (x)
+                           (if (string= (car (split-string x)) "*")
+                               (car (cdr (split-string x)))
+                             (car (split-string x)))))
+          (cdr (butlast (split-string (shell-command-to-string "kubectl config get-contexts") "\n"))))))
+
+(defun kube-switch ()
+  "Switch to a given configuation."
+  (interactive)
+  (let* ((kube-contexts (kube-get-contexts)))
+    (helm :sources (helm-build-sync-source "Configured Kubernetes Contexts"
+                     :candidates kube-contexts
+                     :fuzzy-match t
+                     :action '(("Change" . do-kubectl-switch)))
+          :buffer "*helm kubectl:switch*")))
+
 (defun yaml-next-field ()
   "Jump to next yaml field."
   (interactive)

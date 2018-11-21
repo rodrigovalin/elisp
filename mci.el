@@ -13,6 +13,8 @@
 
 ;;; code:
 
+(require 'ido)
+
 
 (defun mci-get-hosts ()
   "Gets mci list of hosts from mci."
@@ -158,6 +160,21 @@
                        ("Ssh into" . mci-ssh)
                        ("Kill instance" . mci-kill)))
           :buffer "*helm MCI*")))
+
+(defun do--evergreen-patch (project task variant)
+  "Run evergreen patch setting PROJECT, TASK and VARIANT."
+  (shell-command-to-string (concat "evergreen patch --project " project " --tasks " task " --variants " variant " --finalize --yes")))
+
+(defun evergreen-patch ()
+  "Run a patch in evergreen."
+  (interactive)
+  (let* ((project-choices '("ops-manager-kubernetes"))
+         (tasks-choices '("e2e_rs_base" "e2e_rs_pv_multiple" "e2e_rs_ent" "e2e_rs_base" "e2e_sharded_cluster_base" "e2e_sharded_cluster_pv"))
+         (variants-choices '("e2e_kube_vanilla_v1.10" "e2e_openshift_origin_v3.11"))
+         (project (ido-completing-read "Project: " project-choices))
+         (task (ido-completing-read "Task: " tasks-choices))
+         (variant (ido-completing-read "Variant: " variants-choices)))
+    (message (do--evergreen-patch project task variant))))
 
 (provide 'mci)
 ;;; mci.el ends here

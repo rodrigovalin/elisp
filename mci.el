@@ -161,20 +161,44 @@
                        ("Kill instance" . mci-kill)))
           :buffer "*helm MCI*")))
 
-(defun do--evergreen-patch (project task variant)
-  "Run evergreen patch setting PROJECT, TASK and VARIANT."
-  (shell-command-to-string (concat "evergreen patch --project " project " --tasks " task " --variants " variant " --finalize --yes")))
+;; (defun do--evergreen-patch (project task variant)
+;;   "Run evergreen patch setting PROJECT, TASK and VARIANT."
+;;   (shell-command-to-string (concat "evergreen patch --project " project " --tasks " task " --variants " variant " --finalize --yes")))
 
-(defun evergreen-patch ()
-  "Run a patch in evergreen."
+;; (defun evergreen-patch ()
+;;   "Run a patch in evergreen."
+;;   (interactive)
+;;   (let* ((project-choices '("ops-manager-kubernetes"))
+;;          (tasks-choices '("e2e_rs_base" "e2e_rs_pv_multiple" "e2e_rs_ent" "e2e_rs_base" "e2e_sharded_cluster_base" "e2e_sharded_cluster_pv"))
+;;          (variants-choices '("e2e_kube_vanilla_v1.10" "e2e_openshift_origin_v3.11"))
+;;          (project (ido-completing-read "Project: " project-choices))
+;;          (task (ido-completing-read "Task: " tasks-choices))
+;;          (variant (ido-completing-read "Variant: " variants-choices)))
+;;     (message (do--evergreen-patch project task variant))))
+
+(defun evergreen-edit-source-part ()
+  "Edits a yaml multiline string as if it was a bash script."
   (interactive)
-  (let* ((project-choices '("ops-manager-kubernetes"))
-         (tasks-choices '("e2e_rs_base" "e2e_rs_pv_multiple" "e2e_rs_ent" "e2e_rs_base" "e2e_sharded_cluster_base" "e2e_sharded_cluster_pv"))
-         (variants-choices '("e2e_kube_vanilla_v1.10" "e2e_openshift_origin_v3.11"))
-         (project (ido-completing-read "Project: " project-choices))
-         (task (ido-completing-read "Task: " tasks-choices))
-         (variant (ido-completing-read "Variant: " variants-choices)))
-    (message (do--evergreen-patch project task variant))))
+  (narrow-to-region (point) (mark))
+  (shell-script-mode)
+  (goto-char (point-max))
+  (push-mark)
+  (goto-char (point-min))
+  (crux-move-beginning-of-line nil)
+  (setf *evergreen-saved-indent-size* (- (point) (point-min)))
+  ; (setf *evergreen-saved-major-mode* (print (major-mode)))
+  (kill-rectangle (point) (mark)))
+
+(defun evergreen-edit-source-part-exit ()
+  "Exit editing of this part and return to the widen buffer."
+  (interactive)
+  (goto-char (point-min))
+  (push-mark)
+  (goto-char (point-max))
+  (message "indenting %d" *evergreen-saved-indent-size*)
+  (replace-rectangle (mark) (point) (make-string *evergreen-saved-indent-size* ?\ ))
+  (yaml-mode)
+  (widen))
 
 (provide 'mci)
 ;;; mci.el ends here
